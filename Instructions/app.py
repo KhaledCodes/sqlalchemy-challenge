@@ -63,10 +63,31 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    ''' do code'''
+    results1 = session.query(Station.station).all()
 
-# @app.route("/api/v1.0/<start>")
-# def stats():
+    return jsonify(results1)
+
+@app.route("/api/v1.0/tobs")
+def tobs():
+    lastdate = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    lastdate = dt.datetime.strptime(str(lastdate[0]), '%Y-%m-%d')
+    yearago =  lastdate - dt.timedelta(days=365)
+    results = session.query(Measurement.tobs, Measurement.date).\
+    filter(Measurement.date >= yearago).all()
+
+    return jsonify(results)
+
+@app.route("/api/v1.0/<start_date>")
+def calc_temps(start_date):
+    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).all()
+
+
+    return jsonify(results)
+#    result = session.query(Measurement.tobs).\
+#    filter(Measurement.station == 'USC00519281').\
+#    filter(Measurement.date >= yearago).all()
+
 # @app.route("/api/v1.0/<start>/<end>")
 # def names():
 
